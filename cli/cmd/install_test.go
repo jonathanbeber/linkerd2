@@ -32,9 +32,9 @@ func TestRender(t *testing.T) {
 	// by `render()`.
 	metaOptions := testInstallOptions()
 	metaConfig := metaOptions.configs(nil)
-	metaConfig.Global.LinkerdNamespace = "Namespace"
+	metaConfig.Global.LinkerdNamespace = k8s.ControlPlaneDefaultNS
 	metaValues := &installValues{
-		Namespace:                "Namespace",
+		Namespace:                k8s.ControlPlaneDefaultNS,
 		ControllerImage:          "ControllerImage",
 		WebImage:                 "WebImage",
 		PrometheusImage:          "PrometheusImage",

@@ -47,8 +47,8 @@ func newReport(conf *ResourceConfig) *Report {
 	}
 
 	report := &Report{
-		Kind: strings.ToLower(conf.workload.metaType.Kind),
-		Name: name,
+		Kind:                  strings.ToLower(conf.workload.metaType.Kind),
+		Name:                  name,
 		ControlPlaneNamespace: conf.configs.GetGlobal().GetLinkerdNamespace(),
 	}
 

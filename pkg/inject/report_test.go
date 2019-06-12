@@ -288,6 +288,7 @@ func TestTargetControlPlane(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		testCase := testCase
 		configs := &config.All{
 			Global: &config.Global{LinkerdNamespace: testCase.controlPlaneNS},
 		}
@@ -375,6 +376,7 @@ func TestTargetControlPlane(t *testing.T) {
 			},
 		}
 		for _, testCase := range testCases {
+			testCase := testCase
 			configs := &config.All{
 				Global: &config.Global{LinkerdNamespace: testCase.controlPlaneNS},
 			}

@@ -6,7 +6,7 @@
 kind: Namespace
 apiVersion: v1
 metadata:
-  name: Namespace
+  name: linkerd
   annotations:
     ProxyInjectAnnotation: ProxyInjectDisabled
   labels:
@@ -19,7 +19,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: linkerd-Namespace-identity
+  name: linkerd-linkerd-identity
 rules:
 - apiGroups: ["authentication.k8s.io"]
   resources: ["tokenreviews"]
@@ -28,21 +28,21 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: linkerd-Namespace-identity
+  name: linkerd-linkerd-identity
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: linkerd-Namespace-identity
+  name: linkerd-linkerd-identity
 subjects:
 - kind: ServiceAccount
   name: linkerd-identity
-  namespace: Namespace
+  namespace: linkerd
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-identity
-  namespace: Namespace
+  namespace: linkerd
 ---
 ###
 ### Controller RBAC
@@ -51,7 +51,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: linkerd-Namespace-controller
+  name: linkerd-linkerd-controller
 rules:
 - apiGroups: ["extensions", "apps"]
   resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
@@ -69,21 +69,21 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: linkerd-Namespace-controller
+  name: linkerd-linkerd-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: linkerd-Namespace-controller
+  name: linkerd-linkerd-controller
 subjects:
 - kind: ServiceAccount
   name: linkerd-controller
-  namespace: Namespace
+  namespace: linkerd
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-controller
-  namespace: Namespace
+  namespace: linkerd
 ---
 ###
 ### Web RBAC
@@ -93,7 +93,7 @@ kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-web
-  namespace: Namespace
+  namespace: linkerd
 ---
 ###
 ### Service Profile CRD
@@ -207,7 +207,7 @@ spec:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: linkerd-Namespace-prometheus
+  name: linkerd-linkerd-prometheus
 rules:
 - apiGroups: [""]
   resources: ["pods"]
@@ -216,21 +216,21 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: linkerd-Namespace-prometheus
+  name: linkerd-linkerd-prometheus
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: linkerd-Namespace-prometheus
+  name: linkerd-linkerd-prometheus
 subjects:
 - kind: ServiceAccount
   name: linkerd-prometheus
-  namespace: Namespace
+  namespace: linkerd
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-prometheus
-  namespace: Namespace
+  namespace: linkerd
 ---
 ###
 ### Grafana RBAC
@@ -240,7 +240,7 @@ kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-grafana
-  namespace: Namespace
+  namespace: linkerd
 ---
 ###
 ### Proxy Injector RBAC
@@ -249,7 +249,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-Namespace-proxy-injector
+  name: linkerd-linkerd-proxy-injector
 rules:
 - apiGroups: [""]
   resources: ["namespaces"]
@@ -264,28 +264,28 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-Namespace-proxy-injector
+  name: linkerd-linkerd-proxy-injector
 subjects:
 - kind: ServiceAccount
   name: linkerd-proxy-injector
-  namespace: Namespace
+  namespace: linkerd
   apiGroup: ""
 roleRef:
   kind: ClusterRole
-  name: linkerd-Namespace-proxy-injector
+  name: linkerd-linkerd-proxy-injector
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-proxy-injector
-  namespace: Namespace
+  namespace: linkerd
 ---
 kind: Secret
 apiVersion: v1
 metadata:
   name: linkerd-proxy-injector-tls
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: proxy-injector
   annotations:
@@ -310,7 +310,7 @@ webhooks:
   clientConfig:
     service:
       name: linkerd-proxy-injector
-      namespace: Namespace
+      namespace: linkerd
       path: "/"
     caBundle: cHJveHkgaW5qZWN0b3IgY3J0
   failurePolicy: WebhookFailurePolicy
@@ -327,7 +327,7 @@ webhooks:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-Namespace-sp-validator
+  name: linkerd-linkerd-sp-validator
 rules:
 - apiGroups: [""]
   resources: ["pods"]
@@ -336,28 +336,28 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-Namespace-sp-validator
+  name: linkerd-linkerd-sp-validator
 subjects:
 - kind: ServiceAccount
   name: linkerd-sp-validator
-  namespace: Namespace
+  namespace: linkerd
   apiGroup: ""
 roleRef:
   kind: ClusterRole
-  name: linkerd-Namespace-sp-validator
+  name: linkerd-linkerd-sp-validator
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-sp-validator
-  namespace: Namespace
+  namespace: linkerd
 ---
 kind: Secret
 apiVersion: v1
 metadata:
   name: linkerd-sp-validator-tls
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: sp-validator
   annotations:
@@ -378,7 +378,7 @@ webhooks:
   clientConfig:
     service:
       name: linkerd-sp-validator
-      namespace: Namespace
+      namespace: linkerd
       path: "/"
     caBundle: cHJvZmlsZSB2YWxpZGF0b3IgY3J0
   failurePolicy: WebhookFailurePolicy
@@ -395,7 +395,7 @@ webhooks:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: linkerd-Namespace-tap
+  name: linkerd-linkerd-tap
 rules:
 - apiGroups: [""]
   resources: ["pods", "services", "replicationcontrollers", "namespaces"]
@@ -410,21 +410,21 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: linkerd-Namespace-tap
+  name: linkerd-linkerd-tap
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: linkerd-Namespace-tap
+  name: linkerd-linkerd-tap
 subjects:
 - kind: ServiceAccount
   name: linkerd-tap
-  namespace: Namespace
+  namespace: linkerd
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-tap
-  namespace: Namespace
+  namespace: linkerd
 ---
 ###
 ### Control Plane PSP
@@ -503,7 +503,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: linkerd-config
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: controller
   annotations:
@@ -524,7 +524,7 @@ kind: Secret
 apiVersion: v1
 metadata:
   name: linkerd-identity-issuer
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: identity
   annotations:
@@ -538,7 +538,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-identity
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: identity
   annotations:
@@ -561,7 +561,7 @@ metadata:
   labels:
     ControllerComponentLabel: identity
   name: linkerd-identity
-  namespace: Namespace
+  namespace: linkerd
 spec:
   replicas: 1
   strategy: {}
@@ -575,7 +575,7 @@ spec:
       creationTimestamp: null
       labels:
         ControllerComponentLabel: identity
-        linkerd.io/control-plane-ns: Namespace
+        linkerd.io/control-plane-ns: linkerd
         linkerd.io/proxy-deployment: linkerd-identity
     spec:
       containers:
@@ -612,7 +612,7 @@ spec:
         - name: LINKERD2_PROXY_LOG
           value: warn,linkerd2_proxy=info
         - name: LINKERD2_PROXY_DESTINATION_SVC_ADDR
-          value: linkerd-destination.Namespace.svc.cluster.local:8086
+          value: linkerd-destination.linkerd.svc.cluster.local:8086
         - name: LINKERD2_PROXY_CONTROL_LISTEN_ADDR
           value: 0.0.0.0:4190
         - name: LINKERD2_PROXY_ADMIN_LISTEN_ADDR
@@ -709,7 +709,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-controller-api
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: controller
   annotations:
@@ -727,7 +727,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-destination
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: controller
   annotations:
@@ -750,7 +750,7 @@ metadata:
   labels:
     ControllerComponentLabel: controller
   name: linkerd-controller
-  namespace: Namespace
+  namespace: linkerd
 spec:
   replicas: 1
   strategy: {}
@@ -764,15 +764,15 @@ spec:
       creationTimestamp: null
       labels:
         ControllerComponentLabel: controller
-        linkerd.io/control-plane-ns: Namespace
+        linkerd.io/control-plane-ns: linkerd
         linkerd.io/proxy-deployment: linkerd-controller
     spec:
       containers:
       - args:
         - public-api
-        - -prometheus-url=http://linkerd-prometheus.Namespace.svc.cluster.local:9090
-        - -tap-addr=linkerd-tap.Namespace.svc.cluster.local:8088
-        - -controller-namespace=Namespace
+        - -prometheus-url=http://linkerd-prometheus.linkerd.svc.cluster.local:9090
+        - -tap-addr=linkerd-tap.linkerd.svc.cluster.local:8088
+        - -controller-namespace=linkerd
         - -log-level=ControllerLogLevel
         image: ControllerImage
         imagePullPolicy: ImagePullPolicy
@@ -801,7 +801,7 @@ spec:
       - args:
         - destination
         - -addr=:8086
-        - -controller-namespace=Namespace
+        - -controller-namespace=linkerd
         - -enable-h2-upgrade=true
         - -log-level=ControllerLogLevel
         image: ControllerImage
@@ -926,7 +926,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-web
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: web
   annotations:
@@ -952,7 +952,7 @@ metadata:
   labels:
     ControllerComponentLabel: web
   name: linkerd-web
-  namespace: Namespace
+  namespace: linkerd
 spec:
   replicas: 1
   strategy: {}
@@ -966,14 +966,14 @@ spec:
       creationTimestamp: null
       labels:
         ControllerComponentLabel: web
-        linkerd.io/control-plane-ns: Namespace
+        linkerd.io/control-plane-ns: linkerd
         linkerd.io/proxy-deployment: linkerd-web
     spec:
       containers:
       - args:
-        - -api-addr=linkerd-controller-api.Namespace.svc.cluster.local:8085
-        - -grafana-addr=linkerd-grafana.Namespace.svc.cluster.local:3000
-        - -controller-namespace=Namespace
+        - -api-addr=linkerd-controller-api.linkerd.svc.cluster.local:8085
+        - -grafana-addr=linkerd-grafana.linkerd.svc.cluster.local:3000
+        - -controller-namespace=linkerd
         - -log-level=ControllerLogLevel
         image: WebImage
         imagePullPolicy: ImagePullPolicy
@@ -1003,7 +1003,7 @@ spec:
         - name: LINKERD2_PROXY_LOG
           value: warn,linkerd2_proxy=info
         - name: LINKERD2_PROXY_DESTINATION_SVC_ADDR
-          value: linkerd-destination.Namespace.svc.cluster.local:8086
+          value: linkerd-destination.linkerd.svc.cluster.local:8086
         - name: LINKERD2_PROXY_CONTROL_LISTEN_ADDR
           value: 0.0.0.0:4190
         - name: LINKERD2_PROXY_ADMIN_LISTEN_ADDR
@@ -1097,7 +1097,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: linkerd-prometheus-config
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: prometheus
   annotations:
@@ -1121,7 +1121,7 @@ data:
       kubernetes_sd_configs:
       - role: pod
         namespaces:
-          names: ['Namespace']
+          names: ['linkerd']
       relabel_configs:
       - source_labels:
         - __meta_kubernetes_pod_container_name
@@ -1132,7 +1132,7 @@ data:
       kubernetes_sd_configs:
       - role: pod
         namespaces:
-          names: ['Namespace']
+          names: ['linkerd']
       relabel_configs:
       - source_labels:
         - __meta_kubernetes_pod_label_linkerd_io_control_plane_component
@@ -1152,7 +1152,7 @@ data:
         - __meta_kubernetes_pod_container_port_name
         - __meta_kubernetes_pod_label_linkerd_io_control_plane_ns
         action: keep
-        regex: ^ProxyContainerName;linkerd-admin;Namespace$
+        regex: ^ProxyContainerName;linkerd-admin;linkerd$
       - source_labels: [__meta_kubernetes_namespace]
         action: replace
         target_label: namespace
@@ -1185,7 +1185,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-prometheus
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: prometheus
   annotations:
@@ -1208,7 +1208,7 @@ metadata:
   labels:
     ControllerComponentLabel: prometheus
   name: linkerd-prometheus
-  namespace: Namespace
+  namespace: linkerd
 spec:
   replicas: 1
   strategy: {}
@@ -1222,7 +1222,7 @@ spec:
       creationTimestamp: null
       labels:
         ControllerComponentLabel: prometheus
-        linkerd.io/control-plane-ns: Namespace
+        linkerd.io/control-plane-ns: linkerd
         linkerd.io/proxy-deployment: linkerd-prometheus
     spec:
       containers:
@@ -1262,7 +1262,7 @@ spec:
         - name: LINKERD2_PROXY_LOG
           value: warn,linkerd2_proxy=info
         - name: LINKERD2_PROXY_DESTINATION_SVC_ADDR
-          value: linkerd-destination.Namespace.svc.cluster.local:8086
+          value: linkerd-destination.linkerd.svc.cluster.local:8086
         - name: LINKERD2_PROXY_CONTROL_LISTEN_ADDR
           value: 0.0.0.0:4190
         - name: LINKERD2_PROXY_ADMIN_LISTEN_ADDR
@@ -1360,7 +1360,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: linkerd-grafana-config
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: grafana
   annotations:
@@ -1392,7 +1392,7 @@ data:
       type: prometheus
       access: proxy
       orgId: 1
-      url: http://linkerd-prometheus.Namespace.svc.cluster.local:9090
+      url: http://linkerd-prometheus.linkerd.svc.cluster.local:9090
       isDefault: true
       jsonData:
         timeInterval: "5s"
@@ -1416,7 +1416,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-grafana
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: grafana
   annotations:
@@ -1439,7 +1439,7 @@ metadata:
   labels:
     ControllerComponentLabel: grafana
   name: linkerd-grafana
-  namespace: Namespace
+  namespace: linkerd
 spec:
   replicas: 1
   strategy: {}
@@ -1453,7 +1453,7 @@ spec:
       creationTimestamp: null
       labels:
         ControllerComponentLabel: grafana
-        linkerd.io/control-plane-ns: Namespace
+        linkerd.io/control-plane-ns: linkerd
         linkerd.io/proxy-deployment: linkerd-grafana
     spec:
       containers:
@@ -1488,7 +1488,7 @@ spec:
         - name: LINKERD2_PROXY_LOG
           value: warn,linkerd2_proxy=info
         - name: LINKERD2_PROXY_DESTINATION_SVC_ADDR
-          value: linkerd-destination.Namespace.svc.cluster.local:8086
+          value: linkerd-destination.linkerd.svc.cluster.local:8086
         - name: LINKERD2_PROXY_CONTROL_LISTEN_ADDR
           value: 0.0.0.0:4190
         - name: LINKERD2_PROXY_ADMIN_LISTEN_ADDR
@@ -1596,7 +1596,7 @@ metadata:
   labels:
     ControllerComponentLabel: proxy-injector
   name: linkerd-proxy-injector
-  namespace: Namespace
+  namespace: linkerd
 spec:
   replicas: 1
   selector:
@@ -1613,7 +1613,7 @@ spec:
       creationTimestamp: null
       labels:
         ControllerComponentLabel: proxy-injector
-        linkerd.io/control-plane-ns: Namespace
+        linkerd.io/control-plane-ns: linkerd
         linkerd.io/proxy-deployment: linkerd-proxy-injector
     spec:
       containers:
@@ -1649,7 +1649,7 @@ spec:
         - name: LINKERD2_PROXY_LOG
           value: warn,linkerd2_proxy=info
         - name: LINKERD2_PROXY_DESTINATION_SVC_ADDR
-          value: linkerd-destination.Namespace.svc.cluster.local:8086
+          value: linkerd-destination.linkerd.svc.cluster.local:8086
         - name: LINKERD2_PROXY_CONTROL_LISTEN_ADDR
           value: 0.0.0.0:4190
         - name: LINKERD2_PROXY_ADMIN_LISTEN_ADDR
@@ -1742,7 +1742,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-proxy-injector
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: proxy-injector
   annotations:
@@ -1764,7 +1764,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-sp-validator
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: sp-validator
   annotations:
@@ -1787,7 +1787,7 @@ metadata:
   labels:
     ControllerComponentLabel: sp-validator
   name: linkerd-sp-validator
-  namespace: Namespace
+  namespace: linkerd
 spec:
   replicas: 1
   selector:
@@ -1804,7 +1804,7 @@ spec:
       creationTimestamp: null
       labels:
         ControllerComponentLabel: sp-validator
-        linkerd.io/control-plane-ns: Namespace
+        linkerd.io/control-plane-ns: linkerd
         linkerd.io/proxy-deployment: linkerd-sp-validator
     spec:
       containers:
@@ -1838,7 +1838,7 @@ spec:
         - name: LINKERD2_PROXY_LOG
           value: warn,linkerd2_proxy=info
         - name: LINKERD2_PROXY_DESTINATION_SVC_ADDR
-          value: linkerd-destination.Namespace.svc.cluster.local:8086
+          value: linkerd-destination.linkerd.svc.cluster.local:8086
         - name: LINKERD2_PROXY_CONTROL_LISTEN_ADDR
           value: 0.0.0.0:4190
         - name: LINKERD2_PROXY_ADMIN_LISTEN_ADDR
@@ -1932,7 +1932,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-tap
-  namespace: Namespace
+  namespace: linkerd
   labels:
     ControllerComponentLabel: tap
   annotations:
@@ -1955,7 +1955,7 @@ metadata:
   labels:
     ControllerComponentLabel: tap
   name: linkerd-tap
-  namespace: Namespace
+  namespace: linkerd
 spec:
   replicas: 1
   strategy: {}
@@ -1969,13 +1969,13 @@ spec:
       creationTimestamp: null
       labels:
         ControllerComponentLabel: tap
-        linkerd.io/control-plane-ns: Namespace
+        linkerd.io/control-plane-ns: linkerd
         linkerd.io/proxy-deployment: linkerd-tap
     spec:
       containers:
       - args:
         - tap
-        - -controller-namespace=Namespace
+        - -controller-namespace=linkerd
         - -log-level=ControllerLogLevel
         image: ControllerImage
         imagePullPolicy: ImagePullPolicy
@@ -2002,7 +2002,7 @@ spec:
         - name: LINKERD2_PROXY_LOG
           value: warn,linkerd2_proxy=info
         - name: LINKERD2_PROXY_DESTINATION_SVC_ADDR
-          value: linkerd-destination.Namespace.svc.cluster.local:8086
+          value: linkerd-destination.linkerd.svc.cluster.local:8086
         - name: LINKERD2_PROXY_CONTROL_LISTEN_ADDR
           value: 0.0.0.0:4190
         - name: LINKERD2_PROXY_ADMIN_LISTEN_ADDR

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/linkerd/linkerd2/controller/gen/config"
 	"github.com/linkerd/linkerd2/pkg/k8s"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -82,7 +83,11 @@ func TestInjectable(t *testing.T) {
 	for i, testCase := range testCases {
 		testCase := testCase
 		t.Run(fmt.Sprintf("test case #%d", i), func(t *testing.T) {
-			resourceConfig := &ResourceConfig{}
+			resourceConfig := &ResourceConfig{
+				configs: &config.All{
+					Global: &config.Global{LinkerdNamespace: k8s.ControlPlaneDefaultNS},
+				},
+			}
 			resourceConfig.WithNsAnnotations(testCase.nsAnnotations)
 			resourceConfig.pod.spec = testCase.podSpec
 			resourceConfig.pod.meta = testCase.podMeta
@@ -239,6 +244,160 @@ func TestDisableByAnnotation(t *testing.T) {
 					t.Errorf("Expected %t. Actual %t", testCase.expected, actual)
 				}
 			})
+		}
+	})
+}
+
+func TestTargetControlPlane(t *testing.T) {
+	var testCases = []struct {
+		controlPlaneNS    string // control plane namespace that the proxy injector belongs to
+		workloadManagedBy string // value of the 'managed-by' annotation on the workload
+		expectedNamespace string // expected result of report.targetControlPlane()
+		expectedManagedBy bool   // true if controlPlaneNS ==  workloadManagedBy
+	}{
+		{
+			controlPlaneNS:    k8s.ControlPlaneDefaultNS,
+			workloadManagedBy: "",
+			expectedNamespace: k8s.ControlPlaneDefaultNS,
+			expectedManagedBy: true,
+		},
+		{
+			controlPlaneNS:    k8s.ControlPlaneDefaultNS,
+			workloadManagedBy: k8s.ControlPlaneDefaultNS,
+			expectedNamespace: k8s.ControlPlaneDefaultNS,
+			expectedManagedBy: true,
+		},
+		{
+			controlPlaneNS:    "linkerd-dev",
+			workloadManagedBy: "linkerd-dev",
+			expectedNamespace: "linkerd-dev",
+			expectedManagedBy: true,
+		},
+		{
+			controlPlaneNS:    "linkerd-dev",
+			workloadManagedBy: k8s.ControlPlaneDefaultNS,
+			expectedNamespace: k8s.ControlPlaneDefaultNS,
+			expectedManagedBy: false,
+		},
+		{
+			controlPlaneNS:    k8s.ControlPlaneDefaultNS,
+			workloadManagedBy: "linkerd-dev",
+			expectedNamespace: "linkerd-dev",
+			expectedManagedBy: false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		configs := &config.All{
+			Global: &config.Global{LinkerdNamespace: testCase.controlPlaneNS},
+		}
+
+		t.Run("pod level annotation", func(t *testing.T) {
+			config := NewResourceConfig(configs, OriginUnknown)
+			config.pod.spec = &corev1.PodSpec{}
+			config.pod.meta = &metav1.ObjectMeta{
+				Annotations: map[string]string{
+					k8s.ProxyManagedByAnnotation: testCase.workloadManagedBy,
+				},
+			}
+
+			report := newReport(config)
+			if actual := report.targetControlPlane(config); actual != testCase.expectedNamespace {
+				t.Errorf("Namespace mismatch. Expected: %s. Actual: %s", testCase.expectedNamespace, actual)
+			}
+
+			if report.ManagedBy != testCase.expectedManagedBy {
+				t.Errorf("Mismatch in 'managed by' values. Expected: %t. Actual: %t", testCase.expectedManagedBy, report.ManagedBy)
+			}
+		})
+
+		t.Run("namespace level annotation", func(t *testing.T) {
+			config := NewResourceConfig(configs, OriginUnknown)
+			config.pod.spec = &corev1.PodSpec{}
+			config.pod.meta = &metav1.ObjectMeta{}
+			config.nsAnnotations = map[string]string{
+				k8s.ProxyManagedByAnnotation: testCase.workloadManagedBy,
+			}
+
+			report := newReport(config)
+			if actual := report.targetControlPlane(config); actual != testCase.expectedNamespace {
+				t.Errorf("Namespace mismatch. Expected: %s. Actual: %s", testCase.expectedNamespace, actual)
+			}
+
+			if report.ManagedBy != testCase.expectedManagedBy {
+				t.Errorf("Mismatch in 'managed by' values. Expected: %t. Actual: %t", testCase.expectedManagedBy, report.ManagedBy)
+			}
+		})
+	}
+
+	t.Run("pod annotation precedes namespace annotation", func(t *testing.T) {
+		var testCases = []struct {
+			controlPlaneNS    string // control plane namespace that the proxy injector belongs to
+			podLevelManagedBy string // value of the 'managed-by' annotation at the pod level
+			nsLevelManagedBy  string // value of the 'managed-by' annotation at the namespace level
+			expectedNamespace string // expected result of report.targetControlPlane()
+			expectedManagedBy bool   // true if controlPlaneNS ==  workloadManagedBy
+		}{
+			{
+				controlPlaneNS:    k8s.ControlPlaneDefaultNS,
+				podLevelManagedBy: "",
+				nsLevelManagedBy:  "",
+				expectedNamespace: k8s.ControlPlaneDefaultNS,
+				expectedManagedBy: true,
+			},
+			{
+				controlPlaneNS:    k8s.ControlPlaneDefaultNS,
+				podLevelManagedBy: k8s.ControlPlaneDefaultNS,
+				nsLevelManagedBy:  "",
+				expectedNamespace: k8s.ControlPlaneDefaultNS,
+				expectedManagedBy: true,
+			},
+			{
+				controlPlaneNS:    k8s.ControlPlaneDefaultNS,
+				podLevelManagedBy: "",
+				nsLevelManagedBy:  k8s.ControlPlaneDefaultNS,
+				expectedNamespace: k8s.ControlPlaneDefaultNS,
+				expectedManagedBy: true,
+			},
+			{
+				controlPlaneNS:    "linkerd-dev",
+				podLevelManagedBy: "linkerd-dev",
+				nsLevelManagedBy:  k8s.ControlPlaneDefaultNS,
+				expectedNamespace: "linkerd-dev",
+				expectedManagedBy: true,
+			},
+			{
+				controlPlaneNS:    k8s.ControlPlaneDefaultNS,
+				podLevelManagedBy: "linkerd-dev1",
+				nsLevelManagedBy:  "linkerd-dev2",
+				expectedNamespace: "linkerd-dev1",
+				expectedManagedBy: false,
+			},
+		}
+		for _, testCase := range testCases {
+			configs := &config.All{
+				Global: &config.Global{LinkerdNamespace: testCase.controlPlaneNS},
+			}
+
+			config := NewResourceConfig(configs, OriginUnknown)
+			config.pod.spec = &corev1.PodSpec{}
+			config.pod.meta = &metav1.ObjectMeta{
+				Annotations: map[string]string{
+					k8s.ProxyManagedByAnnotation: testCase.podLevelManagedBy,
+				},
+			}
+			config.nsAnnotations = map[string]string{
+				k8s.ProxyManagedByAnnotation: testCase.nsLevelManagedBy,
+			}
+
+			report := newReport(config)
+			if actual := report.targetControlPlane(config); actual != testCase.expectedNamespace {
+				t.Errorf("Namespace mismatch. Expected: %s. Actual: %s", testCase.expectedNamespace, actual)
+			}
+
+			if report.ManagedBy != testCase.expectedManagedBy {
+				t.Errorf("Mismatch in 'managed by' values. Expected: %t. Actual: %t", testCase.expectedManagedBy, report.ManagedBy)
+			}
 		}
 	})
 }

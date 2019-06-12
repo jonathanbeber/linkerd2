@@ -12,6 +12,8 @@ spec:
   strategy: {}
   template:
     metadata:
+      annotations:
+        config.linkerd.io/managed-by: linkerd
       creationTimestamp: null
       labels:
         app: web-svc
@@ -48,6 +50,8 @@ spec:
   strategy: {}
   template:
     metadata:
+      annotations:
+        config.linkerd.io/managed-by: linkerd
       creationTimestamp: null
       labels:
         app: web-svc

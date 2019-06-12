@@ -14,6 +14,7 @@ spec:
     metadata:
       annotations:
         config.linkerd.io/admin-port: "1234"
+        config.linkerd.io/managed-by: linkerd
         linkerd.io/inject: enabled
       creationTimestamp: null
       labels:

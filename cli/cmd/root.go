@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/linkerd/linkerd2/pkg/k8s"
 	"github.com/spf13/pflag"
 
 	"github.com/fatih/color"
@@ -17,7 +18,7 @@ import (
 )
 
 const (
-	defaultNamespace      = "linkerd"
+	defaultNamespace      = k8s.ControlPlaneDefaultNS
 	defaultDockerRegistry = "gcr.io/linkerd-io"
 
 	jsonOutput  = "json"

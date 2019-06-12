@@ -156,10 +156,12 @@ const (
 	// disableExternalProfilesAnnotation config.
 	ProxyEnableExternalProfilesAnnotation = ProxyConfigAnnotationsPrefix + "/enable-external-profiles"
 
-	// ProxyVersionOverrideAnnotation can be used to override the proxy version config.
+	// ProxyVersionOverrideAnnotation can be used to override the proxy version
+	// config.
 	ProxyVersionOverrideAnnotation = ProxyConfigAnnotationsPrefix + "/proxy-version"
 
-	// ProxyDisableIdentityAnnotation can be used to disable identity on the injected proxy.
+	// ProxyDisableIdentityAnnotation can be used to disable identity on the
+	// injected proxy.
 	ProxyDisableIdentityAnnotation = ProxyConfigAnnotationsPrefix + "/disable-identity"
 
 	// ProxyDisableTapAnnotation can be used to disable tap on the injected proxy.
@@ -169,6 +171,10 @@ const (
 	// injected.
 	ProxyEnableDebugAnnotation = ProxyConfigAnnotationsPrefix + "/debug"
 
+	// ProxyManagedByAnnotation specifies the namespace of the
+	// control plane that manages the proxy.
+	ProxyManagedByAnnotation = ProxyConfigAnnotationsPrefix + "/managed-by"
+
 	// IdentityModeDefault is assigned to IdentityModeAnnotation to
 	// use the control plane's default identity scheme.
 	IdentityModeDefault = "default"
@@ -176,6 +182,9 @@ const (
 	// IdentityModeDisabled is assigned to IdentityModeAnnotation to
 	// disable the proxy from participating in automatic identity.
 	IdentityModeDisabled = "disabled"
+
+	// ControlPlaneDefaultNS is the default namespace of the control plane.
+	ControlPlaneDefaultNS = "linkerd"
 
 	/*
 	 * Component Names

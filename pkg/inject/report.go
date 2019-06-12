@@ -12,13 +12,15 @@ import (
 // Report contains the Kind and Name for a given workload along with booleans
 // describing the result of the injection transformation
 type Report struct {
-	Kind                string
-	Name                string
-	HostNetwork         bool
-	Sidecar             bool
-	UDP                 bool // true if any port in any container has `protocol: UDP`
-	UnsupportedResource bool
-	InjectDisabled      bool
+	Kind                  string
+	Name                  string
+	ControlPlaneNamespace string
+	HostNetwork           bool
+	Sidecar               bool
+	UDP                   bool // true if any port in any container has `protocol: UDP`
+	UnsupportedResource   bool
+	InjectDisabled        bool
+	ManagedBy             bool
 
 	// Uninjected consists of two boolean flags to indicate if a proxy and
 	// proxy-init containers have been uninjected in this report
@@ -47,6 +49,7 @@ func newReport(conf *ResourceConfig) *Report {
 	report := &Report{
 		Kind: strings.ToLower(conf.workload.metaType.Kind),
 		Name: name,
+		ControlPlaneNamespace: conf.configs.GetGlobal().GetLinkerdNamespace(),
 	}
 
 	if conf.pod.meta != nil && conf.pod.spec != nil {
@@ -54,6 +57,7 @@ func newReport(conf *ResourceConfig) *Report {
 		report.HostNetwork = conf.pod.spec.HostNetwork
 		report.Sidecar = healthcheck.HasExistingSidecars(conf.pod.spec)
 		report.UDP = checkUDPPorts(conf.pod.spec)
+		report.ManagedBy = report.targetControlPlane(conf) == report.ControlPlaneNamespace
 	} else {
 		report.UnsupportedResource = true
 	}
@@ -69,7 +73,7 @@ func (r *Report) ResName() string {
 // Injectable returns false if the report flags indicate that the workload is on a host network
 // or there is already a sidecar or the resource is not supported or inject is explicitly disabled
 func (r *Report) Injectable() bool {
-	return !r.HostNetwork && !r.Sidecar && !r.UnsupportedResource && !r.InjectDisabled
+	return !r.HostNetwork && !r.Sidecar && !r.UnsupportedResource && !r.InjectDisabled && r.ManagedBy
 }
 
 func checkUDPPorts(t *v1.PodSpec) bool {
@@ -114,4 +118,19 @@ func (r *Report) disableByAnnotation(conf *ResourceConfig) bool {
 	}
 
 	return podAnnotation != k8s.ProxyInjectEnabled
+}
+
+func (r *Report) targetControlPlane(conf *ResourceConfig) string {
+	// check which control plane the given workload is targeting by examining its
+	// config.linkerd.io/managed-by annotaton
+	target, exists := conf.pod.meta.Annotations[k8s.ProxyManagedByAnnotation]
+	if !exists {
+		target, exists = conf.nsAnnotations[k8s.ProxyManagedByAnnotation]
+	}
+
+	if target == "" || !exists {
+		target = k8s.ControlPlaneDefaultNS
+	}
+
+	return target
 }

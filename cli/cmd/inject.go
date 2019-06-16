@@ -140,7 +140,7 @@ func (rt resourceTransformerInject) transform(bytes []byte) ([]byte, []inject.Re
 	}
 
 	// add this annotation only if this isn't an install operation.
-	// this annotation indicates the control plane the injected workload is
+	// this annotation specifies the control plane the injected workload is
 	// targeting.
 	if rt.configs.GetInstall() == nil {
 		conf.AppendPodAnnotation(k8s.ProxyManagedByAnnotation, controlPlaneNamespace)

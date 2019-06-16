@@ -20,7 +20,6 @@ type Report struct {
 	UDP                   bool // true if any port in any container has `protocol: UDP`
 	UnsupportedResource   bool
 	InjectDisabled        bool
-	ManagedBy             bool
 
 	// Uninjected consists of two boolean flags to indicate if a proxy and
 	// proxy-init containers have been uninjected in this report
@@ -53,16 +52,31 @@ func newReport(conf *ResourceConfig) *Report {
 	}
 
 	if conf.pod.meta != nil && conf.pod.spec != nil {
-		report.InjectDisabled = report.disableByAnnotation(conf)
+		report.InjectDisabled = report.injectDisabled(conf)
 		report.HostNetwork = conf.pod.spec.HostNetwork
 		report.Sidecar = healthcheck.HasExistingSidecars(conf.pod.spec)
 		report.UDP = checkUDPPorts(conf.pod.spec)
-		report.ManagedBy = report.targetControlPlane(conf) == report.ControlPlaneNamespace
 	} else {
 		report.UnsupportedResource = true
 	}
 
 	return report
+}
+
+func (r *Report) injectDisabled(conf *ResourceConfig) bool {
+	disableByAnnotation := r.disableByAnnotation(conf)
+
+	// if the workload YAML comes from the CLI, no need to check for the
+	// config.linkerd.io/managed-by annotation because the annotation wouldn't
+	// have been set yet.
+	// further refactoring work to simplify this is tasked under
+	// https://github.com/linkerd/linkerd2/issues/2948 as a 2.5 item
+	if conf.origin == OriginCLI {
+		return disableByAnnotation
+	}
+
+	managedBy := r.targetControlPlane(conf) == r.ControlPlaneNamespace
+	return disableByAnnotation || !managedBy
 }
 
 // ResName returns a string "Kind/Name" for the workload referred in the report r
@@ -73,7 +87,7 @@ func (r *Report) ResName() string {
 // Injectable returns false if the report flags indicate that the workload is on a host network
 // or there is already a sidecar or the resource is not supported or inject is explicitly disabled
 func (r *Report) Injectable() bool {
-	return !r.HostNetwork && !r.Sidecar && !r.UnsupportedResource && !r.InjectDisabled && r.ManagedBy
+	return !r.HostNetwork && !r.Sidecar && !r.UnsupportedResource && !r.InjectDisabled
 }
 
 func checkUDPPorts(t *v1.PodSpec) bool {

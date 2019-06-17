@@ -723,6 +723,7 @@ func (values *installValues) render(w io.Writer, configs *pb.All) error {
 
 	return processYAML(&buf, w, ioutil.Discard, resourceTransformerInject{
 		injectProxy: true,
+		install:     true,
 		configs:     configs,
 		proxyOutboundCapacity: map[string]uint{
 			values.PrometheusImage: prometheusProxyOutboundCapacity,

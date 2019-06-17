@@ -13,6 +13,7 @@ spec:
   template:
     metadata:
       annotations:
+        config.linkerd.io/managed-by: linkerd
         linkerd.io/created-by: linkerd/cli dev-undefined
         linkerd.io/identity-mode: default
         linkerd.io/proxy-version: test-inject-proxy-version
@@ -173,6 +174,7 @@ spec:
   template:
     metadata:
       annotations:
+        config.linkerd.io/managed-by: linkerd
         linkerd.io/created-by: linkerd/cli dev-undefined
         linkerd.io/identity-mode: default
         linkerd.io/proxy-version: test-inject-proxy-version
@@ -333,6 +335,7 @@ spec:
   template:
     metadata:
       annotations:
+        config.linkerd.io/managed-by: linkerd
         linkerd.io/created-by: linkerd/cli dev-undefined
         linkerd.io/identity-mode: default
         linkerd.io/proxy-version: test-inject-proxy-version
@@ -493,6 +496,7 @@ spec:
   template:
     metadata:
       annotations:
+        config.linkerd.io/managed-by: linkerd
         linkerd.io/created-by: linkerd/cli dev-undefined
         linkerd.io/identity-mode: default
         linkerd.io/proxy-version: test-inject-proxy-version

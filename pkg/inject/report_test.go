@@ -95,8 +95,8 @@ func TestInjectDisabled(t *testing.T) {
 		config := NewResourceConfig(&config.All{}, OriginCLI)
 		config.pod.spec = &corev1.PodSpec{}
 		for i, testCase := range testCases {
+			testCase := testCase
 			t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-				testCase := testCase
 				t.Run(fmt.Sprintf("with 'linkerd.io/inject: %s", testCase.inject), func(t *testing.T) {
 					config.pod.meta = &metav1.ObjectMeta{
 						Annotations: map[string]string{
@@ -160,8 +160,8 @@ func TestInjectDisabled(t *testing.T) {
 				}
 
 				for i, testCase := range testCases {
+					testCase := testCase
 					t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-						testCase := testCase
 						config.configs.GetGlobal().LinkerdNamespace = testCase.controlPlaneNS
 						config.pod.meta.Annotations[k8s.ProxyManagedByAnnotation] = testCase.workloadManagedBy
 
@@ -189,8 +189,8 @@ func TestInjectDisabled(t *testing.T) {
 				}
 
 				for i, testCase := range testCases {
+					testCase := testCase
 					t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-						testCase := testCase
 						config.configs.GetGlobal().LinkerdNamespace = testCase.controlPlaneNS
 						config.pod.meta.Annotations[k8s.ProxyManagedByAnnotation] = testCase.workloadManagedBy
 
@@ -408,8 +408,8 @@ func TestTargetControlPlane(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
+		testCase := testCase
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			testCase := testCase
 			configs := &config.All{
 				Global: &config.Global{LinkerdNamespace: testCase.controlPlaneNS},
 			}
@@ -480,8 +480,8 @@ func TestTargetControlPlane(t *testing.T) {
 		}
 
 		for i, testCase := range testCases {
+			testCase := testCase
 			t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-				testCase := testCase
 				configs := &config.All{
 					Global: &config.Global{LinkerdNamespace: testCase.controlPlaneNS},
 				}

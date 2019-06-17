@@ -19,6 +19,7 @@ spec:
         config.linkerd.io/image-pull-policy: Never
         config.linkerd.io/inbound-port: "678"
         config.linkerd.io/init-image: init-image
+        config.linkerd.io/managed-by: fake-ns
         config.linkerd.io/outbound-port: "890"
         config.linkerd.io/proxy-cpu-limit: 20m
         config.linkerd.io/proxy-cpu-request: 10m

@@ -32,6 +32,7 @@ const (
 
 type resourceTransformerInject struct {
 	injectProxy           bool
+	install               bool
 	configs               *cfg.All
 	overrideAnnotations   map[string]string
 	proxyOutboundCapacity map[string]uint
@@ -139,10 +140,7 @@ func (rt resourceTransformerInject) transform(bytes []byte) ([]byte, []inject.Re
 		conf.AppendPodAnnotation(k8s.ProxyEnableDebugAnnotation, "true")
 	}
 
-	// add this annotation only if this isn't an install operation.
-	// this annotation specifies the control plane the injected workload is
-	// targeting.
-	if rt.configs.GetInstall() == nil {
+	if !rt.install {
 		conf.AppendPodAnnotation(k8s.ProxyManagedByAnnotation, controlPlaneNamespace)
 	}
 

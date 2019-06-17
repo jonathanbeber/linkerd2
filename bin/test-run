@@ -91,7 +91,7 @@ exit_code=0
 run_test "$test_directory/install_test.go" --linkerd-namespace=$linkerd_namespace || exit_code=$?
 run_upgrade_test "$linkerd_namespace"-upgrade
 for test in $(find "$test_directory" -mindepth 2 -name '*_test.go'); do
-    run_test "$test" --linkerd-namespace=$linkerd_namespace || exit_code=$?
+    run_test "$test" --linkerd-namespace="$linkerd_namespace"-upgrade || exit_code=$?
 done
 
 if [ $exit_code -eq 0 ]; then

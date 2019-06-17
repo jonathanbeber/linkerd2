@@ -118,7 +118,9 @@ func TestAnnotationPermutations(t *testing.T) {
 		for _, podAnnotation := range injectAnnotations {
 			// patch injectYAML with unique name and pod annotations
 			name := deployName
-			podAnnotations := map[string]string{}
+			podAnnotations := map[string]string{
+				k8s.ProxyManagedByAnnotation: TestHelper.GetLinkerdNamespace(),
+			}
 			if podAnnotation != "" {
 				podAnnotations[k8s.ProxyInjectAnnotation] = podAnnotation
 				name = fmt.Sprintf("%s-%s", name, podAnnotation)

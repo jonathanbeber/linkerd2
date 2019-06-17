@@ -31,6 +31,12 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+const (
+	namespaceSmokeTest           = "smoke-test"
+	namespaceSmokeTestManual     = "smoke-test-manual"
+	namespaceSmokeTestAutoInject = "smoke-test-ann"
+)
+
 var (
 	linkerdSvcs = []string{
 		"linkerd-controller-api",
@@ -94,18 +100,18 @@ var (
 		injectArgs  []string
 	}{
 		{
-			ns: "smoke-test",
+			ns: namespaceSmokeTest,
 			annotations: map[string]string{
 				k8s.ProxyInjectAnnotation: k8s.ProxyInjectEnabled,
 			},
 			injectArgs: nil,
 		},
 		{
-			ns:         "smoke-test-manual",
+			ns:         namespaceSmokeTestManual,
 			injectArgs: []string{"--manual"},
 		},
 		{
-			ns:         "smoke-test-ann",
+			ns:         namespaceSmokeTestAutoInject,
 			injectArgs: []string{},
 		},
 	}
@@ -342,10 +348,15 @@ func TestInject(t *testing.T) {
 	for _, tc := range injectionCases {
 		tc := tc // pin
 		t.Run(tc.ns, func(t *testing.T) {
+			switch tc.ns {
+			case namespaceSmokeTest:
+				tc.annotations[k8s.ProxyManagedByAnnotation] = TestHelper.GetLinkerdNamespace()
+			case namespaceSmokeTestManual, namespaceSmokeTestAutoInject:
+				tc.injectArgs = append(tc.injectArgs, "-l", TestHelper.GetLinkerdNamespace())
+			}
+
 			var out string
-
 			prefixedNs := TestHelper.GetTestNamespace(tc.ns)
-
 			err := TestHelper.CreateNamespaceIfNotExists(prefixedNs, tc.annotations)
 			if err != nil {
 				t.Fatalf("failed to create %s namespace: %s", prefixedNs, err)
@@ -410,6 +421,13 @@ func TestServiceProfileDeploy(t *testing.T) {
 	for _, tc := range injectionCases {
 		tc := tc // pin
 		t.Run(tc.ns, func(t *testing.T) {
+			switch tc.ns {
+			case namespaceSmokeTest:
+				tc.annotations[k8s.ProxyManagedByAnnotation] = TestHelper.GetLinkerdNamespace()
+			case namespaceSmokeTestManual, namespaceSmokeTestAutoInject:
+				tc.injectArgs = append(tc.injectArgs, "-l", TestHelper.GetLinkerdNamespace())
+			}
+
 			prefixedNs := TestHelper.GetTestNamespace(tc.ns)
 
 			cmd := []string{"profile", "-n", prefixedNs, "--proto", "-", "smoke-test-terminus-svc"}
@@ -430,11 +448,18 @@ func TestCheckProxy(t *testing.T) {
 	for _, tc := range injectionCases {
 		tc := tc // pin
 		t.Run(tc.ns, func(t *testing.T) {
+			switch tc.ns {
+			case namespaceSmokeTest:
+				tc.annotations[k8s.ProxyManagedByAnnotation] = TestHelper.GetLinkerdNamespace()
+			case namespaceSmokeTestManual, namespaceSmokeTestAutoInject:
+				tc.injectArgs = append(tc.injectArgs, "-l", TestHelper.GetLinkerdNamespace())
+			}
+
 			prefixedNs := TestHelper.GetTestNamespace(tc.ns)
 			cmd := []string{"check", "--proxy", "--expected-version", TestHelper.GetVersion(), "--namespace", prefixedNs, "--wait=0"}
 			golden := "check.proxy.golden"
 
-			err := TestHelper.RetryFor(time.Minute*5, func() error {
+			err := TestHelper.RetryFor(time.Minute, func() error {
 				out, _, err := TestHelper.LinkerdRun(cmd...)
 				if err != nil {
 					return fmt.Errorf("Check command failed\n%s", out)

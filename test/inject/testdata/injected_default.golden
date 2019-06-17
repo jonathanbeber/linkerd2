@@ -13,6 +13,7 @@ spec:
       annotations:
         config.linkerd.io/disable-identity: "true"
         config.linkerd.io/init-image: init-image
+        config.linkerd.io/managed-by: fake-ns
         config.linkerd.io/proxy-image: proxy-image
         config.linkerd.io/proxy-version: proxy-version
         linkerd.io/created-by: fake # this gets removed during testing
